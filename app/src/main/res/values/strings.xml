@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">Makerspace Manager</string>
+    <string name="NFC_ERROR_DETECTED">No NFC tag detected!</string>
+    <string name="NFC_WRITE_SUCCESS">Text written to the NFC tag successfully!</string>
+    <string name="NFC_WRITE_ERROR">Error during writing, is the NFC tag close enough to your device?</string>
+    <string name="DATABASE_ADD_ERROR">Failed to Communicate with Database</string>
+
+    <string-array name="majors_array">
+        <item>Other</item>
+        <item>EECS</item>
+        <item>BIOE</item>
+        <item>MIME</item>
+        <item>CHEME</item>
+        <item>ENGT</item>
+        <item>CIVE</item>
+    </string-array>
+</resources>

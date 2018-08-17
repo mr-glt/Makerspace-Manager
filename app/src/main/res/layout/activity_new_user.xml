@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".NewUser"
+    android:orientation="vertical"
+    android:id="@+id/layout">
+
+    <com.rengwuxian.materialedittext.MaterialEditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="textPersonName"
+        android:hint="Name"
+        app:met_floatingLabel="normal"
+        android:id="@+id/name"
+        android:layout_margin="5dp"/>
+
+    <Spinner
+        android:id="@+id/spinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="5dp"/>
+    <com.rengwuxian.materialedittext.MaterialEditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="number"
+        android:hint="Rocket Number"
+        app:met_floatingLabel="normal"
+        android:id="@+id/rocketNumber"
+        android:layout_margin="5dp"/>
+
+    <CheckBox
+        android:id="@+id/seniorDesignCB"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Senior Design"
+        android:layout_margin="5dp"/>
+
+    <CheckBox
+        android:id="@+id/freshmanDesignCB"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Freshman Design"
+        android:layout_margin="5dp"/>
+    <CheckBox
+        android:id="@+id/studentOrgCB"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Student Organization"
+        android:layout_margin="5dp"/>
+    <com.rengwuxian.materialedittext.MaterialEditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Organization"
+        android:visibility="gone"
+        android:layout_margin="5dp"
+        app:met_floatingLabel="normal"
+        android:id="@+id/studentOrgTitle" />
+    <ImageButton
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:src="@drawable/baseline_nfc_24"
+        android:id="@+id/burnTag" />
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Add User"
+        android:id="@+id/addUser"
+        android:enabled="true"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text=""/>
+</LinearLayout>
