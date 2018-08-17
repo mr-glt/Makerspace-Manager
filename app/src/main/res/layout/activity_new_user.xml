@@ -1,76 +1,106 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".NewUser"
-    android:orientation="vertical"
-    android:id="@+id/layout">
+    android:layout_height="wrap_content"
+    android:layout_margin="5dp">
 
-    <com.rengwuxian.materialedittext.MaterialEditText
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:inputType="textPersonName"
-        android:hint="Name"
-        app:met_floatingLabel="normal"
-        android:id="@+id/name"
-        android:layout_margin="5dp"/>
+        android:layout_height="match_parent"
+        tools:context=".NewUser"
+        android:orientation="vertical"
+        android:id="@+id/layout">
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:layout_marginEnd="5dp">
+            <com.google.android.material.textfield.TextInputEditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPersonName"
+                android:hint="@string/name"
+                android:id="@+id/name"/>
+        </com.google.android.material.textfield.TextInputLayout>
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:layout_marginEnd="5dp">
+            <com.google.android.material.textfield.TextInputEditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="number"
+                android:hint="@string/rocket_number"
+                android:id="@+id/rocketNumber"/>
+        </com.google.android.material.textfield.TextInputLayout>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/major"
+            android:layout_marginStart="5sp"
+            android:textAppearance="@android:style/TextAppearance.Material.Title" />
+        <Spinner
+            android:id="@+id/spinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp"
+            style="@style/Platform.MaterialComponents.Light"/>
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:elevation="10sp">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+                <CheckBox
+                    android:id="@+id/seniorDesignCB"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/senior_design"
+                    android:layout_margin="5dp" />
 
-    <Spinner
-        android:id="@+id/spinner"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="5dp"/>
-    <com.rengwuxian.materialedittext.MaterialEditText
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:inputType="number"
-        android:hint="Rocket Number"
-        app:met_floatingLabel="normal"
-        android:id="@+id/rocketNumber"
-        android:layout_margin="5dp"/>
-
-    <CheckBox
-        android:id="@+id/seniorDesignCB"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Senior Design"
-        android:layout_margin="5dp"/>
-
-    <CheckBox
-        android:id="@+id/freshmanDesignCB"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Freshman Design"
-        android:layout_margin="5dp"/>
-    <CheckBox
-        android:id="@+id/studentOrgCB"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Student Organization"
-        android:layout_margin="5dp"/>
-    <com.rengwuxian.materialedittext.MaterialEditText
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Organization"
-        android:visibility="gone"
-        android:layout_margin="5dp"
-        app:met_floatingLabel="normal"
-        android:id="@+id/studentOrgTitle" />
-    <ImageButton
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:src="@drawable/baseline_nfc_24"
-        android:id="@+id/burnTag" />
-    <Button
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Add User"
-        android:id="@+id/addUser"
-        android:enabled="true"/>
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text=""/>
-</LinearLayout>
+                <CheckBox
+                    android:id="@+id/freshmanDesignCB"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/freshman_design"
+                    android:layout_margin="5dp"/>
+                <CheckBox
+                    android:id="@+id/studentOrgCB"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/student_organization"
+                    android:layout_margin="5dp"/>
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="5dp"
+                    android:visibility="gone"
+                    android:id="@+id/orgHolder">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/organization"
+                        android:id="@+id/studentOrgTitle" />
+                </com.google.android.material.textfield.TextInputLayout>
+                <ImageButton
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/baseline_nfc_24"
+                    android:id="@+id/burnTag"
+                    android:visibility="gone"/>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+        <com.google.android.material.button.MaterialButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/add_user"
+            android:id="@+id/addUser"
+            android:enabled="true"
+            android:layout_gravity="center"/>
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

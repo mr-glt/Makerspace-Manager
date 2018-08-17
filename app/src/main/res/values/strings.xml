@@ -4,6 +4,14 @@
     <string name="NFC_WRITE_SUCCESS">Text written to the NFC tag successfully!</string>
     <string name="NFC_WRITE_ERROR">Error during writing, is the NFC tag close enough to your device?</string>
     <string name="DATABASE_ADD_ERROR">Failed to Communicate with Database</string>
+    <string name="senior_design">Senior Design</string>
+    <string name="freshman_design">Freshman Design</string>
+    <string name="student_organization">Student Organization</string>
+    <string name="organization">Organization</string>
+    <string name="add_user">Add User</string>
+    <string name="major">Major:</string>
+    <string name="rocket_number">Rocket Number</string>
+    <string name="name">Name</string>
 
     <string-array name="majors_array">
         <item>Other</item>

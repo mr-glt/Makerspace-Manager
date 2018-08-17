@@ -25,8 +25,9 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.google.android.material.snackbar.Snackbar;
+import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.rengwuxian.materialedittext.MaterialEditText;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -36,9 +37,10 @@ import java.util.Objects;
 
 public class NewUser extends AppCompatActivity {
     //UI
-    MaterialEditText nameET;
-    MaterialEditText rocketNumberET;
-    MaterialEditText studentOrgET;
+    TextInputEditText nameET;
+    TextInputEditText rocketNumberET;
+    TextInputEditText studentOrgET;
+    TextInputLayout orgHolder;
     CheckBox freshmanDesignCB;
     CheckBox seniorDesignCB;
     CheckBox studentOrgCB;
@@ -136,6 +138,7 @@ public class NewUser extends AppCompatActivity {
         seniorDesignCB = findViewById(R.id.seniorDesignCB);
         studentOrgCB = findViewById(R.id.studentOrgCB);
         studentOrgET = findViewById(R.id.studentOrgTitle);
+        orgHolder = findViewById(R.id.orgHolder);
 
         writeTag.setOnClickListener(view -> {
             try {
@@ -160,9 +163,9 @@ public class NewUser extends AppCompatActivity {
 
         studentOrgCB.setOnCheckedChangeListener((compoundButton, b) -> {
             if (b){
-                studentOrgET.setVisibility(View.VISIBLE);
+                orgHolder.setVisibility(View.VISIBLE);
             }else{
-                studentOrgET.setVisibility(View.GONE);
+                orgHolder.setVisibility(View.GONE);
             }
         });
 
