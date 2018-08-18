@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Makerspace Manager</string>
     <string name="NFC_ERROR_DETECTED">No NFC tag detected!</string>
-    <string name="NFC_WRITE_SUCCESS">Text written to the NFC tag successfully!</string>
+    <string name="NFC_WRITE_SUCCESS">ID written to the NFC tag successfully!</string>
     <string name="NFC_WRITE_ERROR">Error during writing, is the NFC tag close enough to your device?</string>
     <string name="DATABASE_ADD_ERROR">Failed to Communicate with Database</string>
     <string name="senior_design">Senior Design</string>

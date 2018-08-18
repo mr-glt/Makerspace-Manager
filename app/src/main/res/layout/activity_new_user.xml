@@ -95,6 +95,31 @@
                     android:visibility="gone"/>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
+        <com.skyfishjy.library.RippleBackground
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/rippleView"
+            app:rb_color="#cfd8dc"
+            app:rb_radius="24dp"
+            app:rb_rippleAmount="3"
+            app:rb_duration="3000"
+            app:rb_type="fillRipple"
+            app:rb_scale="5">
+            <ImageView
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_centerInParent="true"
+                android:id="@+id/nfcImage"
+                android:src="@drawable/baseline_nfc_24"
+                android:layout_marginTop="15sp"
+                android:tint="@color/colorAccent"/>
+        </com.skyfishjy.library.RippleBackground>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Tap to Write NFC Tag"
+            android:layout_gravity="center"
+            android:id="@+id/nfcWriteText"/>
         <com.google.android.material.button.MaterialButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

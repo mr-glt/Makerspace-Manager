@@ -1,6 +1,7 @@
 package org.utmakersociety.makerspacemanager;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
 import android.app.PendingIntent;
 import android.content.Context;
@@ -21,13 +22,16 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.skyfishjy.library.RippleBackground;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -46,6 +50,9 @@ public class NewUser extends AppCompatActivity {
     CheckBox studentOrgCB;
     ImageButton writeTag;
     Button addUser;
+    RippleBackground rippleBackground;
+    ImageView nfcImage;
+    TextView nfcWriteText;
 
     //NFC
     NfcAdapter nfcAdapter;
@@ -139,6 +146,10 @@ public class NewUser extends AppCompatActivity {
         studentOrgCB = findViewById(R.id.studentOrgCB);
         studentOrgET = findViewById(R.id.studentOrgTitle);
         orgHolder = findViewById(R.id.orgHolder);
+        rippleBackground = findViewById(R.id.rippleView);
+        nfcImage = findViewById(R.id.nfcImage);
+        nfcWriteText = findViewById(R.id.nfcWriteText);
+        rippleBackground.startRippleAnimation();
 
         writeTag.setOnClickListener(view -> {
             try {
@@ -268,7 +279,28 @@ public class NewUser extends AppCompatActivity {
             Log.e("UnsupportedEncoding", e.toString());
         }
 
-        Toast.makeText(context, "NFC Content: " + text, Toast.LENGTH_LONG).show();
+        try {
+            if(tag == null) {
+                Snackbar.make(contextView,
+                        R.string.NFC_ERROR_DETECTED, Snackbar.LENGTH_SHORT)
+                        .show();
+            } else {
+                write(guid, tag);
+                Snackbar.make(contextView,
+                        R.string.NFC_WRITE_SUCCESS, Snackbar.LENGTH_SHORT)
+                        .show();
+                rippleBackground.stopRippleAnimation();
+                nfcImage.setImageDrawable(ContextCompat.getDrawable(this,
+                        R.drawable.baseline_check_circle_24));
+                nfcWriteText.setText("Tag Written Successfully");
+                addUser.setEnabled(true);
+            }
+        } catch (IOException | FormatException e) {
+            Snackbar.make(contextView,
+                    R.string.NFC_WRITE_ERROR, Snackbar.LENGTH_SHORT)
+                    .show();
+            e.printStackTrace();
+        }
 
     }
 
