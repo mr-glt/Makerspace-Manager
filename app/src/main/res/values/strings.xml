@@ -12,6 +12,7 @@
     <string name="major">Major:</string>
     <string name="rocket_number">Rocket Number</string>
     <string name="name">Name</string>
+    <string name="nfc_good">Tag Written Successfully</string>
 
     <string-array name="majors_array">
         <item>Other</item>

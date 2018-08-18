@@ -292,7 +292,7 @@ public class NewUser extends AppCompatActivity {
                 rippleBackground.stopRippleAnimation();
                 nfcImage.setImageDrawable(ContextCompat.getDrawable(this,
                         R.drawable.baseline_check_circle_24));
-                nfcWriteText.setText("Tag Written Successfully");
+                nfcWriteText.setText(R.string.nfc_good);
                 addUser.setEnabled(true);
             }
         } catch (IOException | FormatException e) {

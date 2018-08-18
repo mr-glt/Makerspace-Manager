@@ -53,7 +53,6 @@ public class MainActivity extends AppCompatActivity {
     Context context;
     Tag tag;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -99,22 +98,9 @@ public class MainActivity extends AppCompatActivity {
             dataToWrite = result.getText();
             button.setImageDrawable(getResources().getDrawable(
                     R.drawable.baseline_photo_camera_white_24, context.getTheme()));
-
-            db.collection("users").document(result.getText())
-                    .get()
-                    .addOnCompleteListener(task -> {
-                        if (!task.getResult().exists()){
-                            scannerView.setVisibility(View.GONE);
-                            codeScanner.stopPreview();
-                            Intent intent = new Intent(context, NewUser.class);
-                            String message = result.getText();
-                            intent.putExtra("GUID", message);
-                            startActivity(intent);
-                        }else{
-                            scannerView.setVisibility(View.GONE);
-                            codeScanner.stopPreview();
-                        }
-                    });
+            runUser(result.getText());
+            scannerView.setVisibility(View.GONE);
+            codeScanner.stopPreview();
         }));
         scannerView.setOnClickListener(view -> codeScanner.startPreview());
 
@@ -156,6 +142,18 @@ public class MainActivity extends AppCompatActivity {
         super.onPause();
     }
 
+    private void runUser(String key){
+        db.collection("users").document(key)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (!task.getResult().exists()){
+                        Intent intent = new Intent(context, NewUser.class);
+                        intent.putExtra("GUID", key);
+                        startActivity(intent);
+                    }else{
+                    }
+                });
+    }
     private void readFromIntent(Intent intent) {
         String action = intent.getAction();
         if (NfcAdapter.ACTION_TAG_DISCOVERED.equals(action)
@@ -185,12 +183,10 @@ public class MainActivity extends AppCompatActivity {
 
         try {
             text = new String(payload, languageCodeLength + 1, payload.length - languageCodeLength - 1, textEncoding);
+            runUser(text);
         } catch (UnsupportedEncodingException e) {
             Log.e("UnsupportedEncoding", e.toString());
         }
-
-        Toast.makeText(context, "NFC Content: " + text, Toast.LENGTH_LONG).show();
-
     }
 
     private void write(String text, Tag tag) throws IOException, FormatException {
