@@ -9,7 +9,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".NewUser"
+        tools:context=".activities.NewUser"
         android:orientation="vertical"
         android:id="@+id/layout">
         <com.google.android.material.textfield.TextInputLayout
@@ -48,53 +48,59 @@
             android:layout_height="wrap_content"
             android:layout_margin="5dp"
             style="@style/Platform.MaterialComponents.Light"/>
-        <com.google.android.material.card.MaterialCardView
+        <View android:id="@+id/tile_divider"
+            android:layout_width="match_parent"
+            android:layout_margin="5sp"
+            android:layout_height="1dp"
+            android:background="?android:attr/dividerVertical" />
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:elevation="10sp">
-            <LinearLayout
+            android:orientation="vertical">
+            <CheckBox
+                android:id="@+id/employeeCB"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
-                <CheckBox
-                    android:id="@+id/seniorDesignCB"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/senior_design"
-                    android:layout_margin="5dp" />
+                android:text="@string/employee"
+                android:layout_margin="5dp" />
+            <CheckBox
+                android:id="@+id/seniorDesignCB"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/senior_design"
+                android:layout_margin="5dp" />
 
-                <CheckBox
-                    android:id="@+id/freshmanDesignCB"
+            <CheckBox
+                android:id="@+id/freshmanDesignCB"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/freshman_design"
+                android:layout_margin="5dp"/>
+            <CheckBox
+                android:id="@+id/studentOrgCB"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/student_organization"
+                android:layout_margin="5dp"/>
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:visibility="gone"
+                android:id="@+id/orgHolder">
+                <com.google.android.material.textfield.TextInputEditText
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/freshman_design"
-                    android:layout_margin="5dp"/>
-                <CheckBox
-                    android:id="@+id/studentOrgCB"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/student_organization"
-                    android:layout_margin="5dp"/>
-                <com.google.android.material.textfield.TextInputLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="5dp"
-                    android:visibility="gone"
-                    android:id="@+id/orgHolder">
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:hint="@string/organization"
-                        android:id="@+id/studentOrgTitle" />
-                </com.google.android.material.textfield.TextInputLayout>
-                <ImageButton
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/baseline_nfc_24"
-                    android:id="@+id/burnTag"
-                    android:visibility="gone"/>
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
+                    android:hint="@string/organization"
+                    android:id="@+id/studentOrgTitle" />
+            </com.google.android.material.textfield.TextInputLayout>
+            <ImageButton
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:src="@drawable/baseline_nfc_24"
+                android:id="@+id/burnTag"
+                android:visibility="gone"/>
+        </LinearLayout>
         <com.skyfishjy.library.RippleBackground
             android:layout_width="match_parent"
             android:layout_height="match_parent"

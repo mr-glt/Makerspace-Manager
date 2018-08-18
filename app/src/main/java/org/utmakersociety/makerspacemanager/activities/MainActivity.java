@@ -1,13 +1,18 @@
-package org.utmakersociety.makerspacemanager;
+package org.utmakersociety.makerspacemanager.activities;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.Manifest;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.nfc.FormatException;
 import android.nfc.NdefMessage;
 import android.nfc.NdefRecord;
@@ -17,20 +22,28 @@ import android.nfc.tech.Ndef;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.budiyev.android.codescanner.CodeScanner;
 import com.budiyev.android.codescanner.CodeScannerView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.skyfishjy.library.RippleBackground;
 
+import org.utmakersociety.makerspacemanager.R;
 import org.utmakersociety.makerspacemanager.adapters.UsersAdapter;
+import org.utmakersociety.makerspacemanager.helpers.RecyclerItemClickListener;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity{
     //QR Code Variables
     CodeScanner codeScanner;
     CodeScannerView scannerView;
@@ -48,9 +61,13 @@ public class MainActivity extends AppCompatActivity {
     //UI
     RecyclerView rv;
     FloatingActionButton button;
+    RippleBackground rippleBackground;
+    ImageView nfcImage;
 
     //Other
+    boolean copyMode;
     Context context;
+    View contextView;
     Tag tag;
 
     @Override
@@ -58,6 +75,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         context = this;
+        contextView = findViewById(R.id.mainLayout);
 
         //Firebase
         db = FirebaseFirestore.getInstance();
@@ -66,7 +84,11 @@ public class MainActivity extends AppCompatActivity {
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         rv.setLayoutManager(new LinearLayoutManager(getBaseContext()));
-                        rv.setAdapter(new UsersAdapter(task.getResult()));
+                        rv.setAdapter(new UsersAdapter(task.getResult(),context));
+                        rv.addOnItemTouchListener(new RecyclerItemClickListener(getBaseContext(),
+                                (view, position) -> {
+                            Log.e("POS",position+"");
+                        }));
                     }
                 });
 
@@ -74,19 +96,24 @@ public class MainActivity extends AppCompatActivity {
         button = findViewById(R.id.floatingActionButton);
         scannerView = findViewById(R.id.scanner_view);
         rv = findViewById(R.id.recView);
+        rippleBackground = findViewById(R.id.rippleView);
+        nfcImage = findViewById(R.id.nfcImage);
         button.setOnClickListener(view -> {
-            if (scannerView.getVisibility()==View.VISIBLE){
-                scannerView.setVisibility(View.GONE);
-                codeScanner.stopPreview();
-                button.setImageDrawable(getResources().getDrawable(
-                        R.drawable.baseline_photo_camera_white_24, context.getTheme()));
+            if (ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_DENIED){
+                ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.CAMERA}, 1);
             }else{
-                scannerView.setVisibility(View.VISIBLE);
-                codeScanner.startPreview();
-                button.setImageDrawable(getResources().getDrawable(
-                        R.drawable.baseline_close_white_24, context.getTheme()));
+                if (scannerView.getVisibility()==View.VISIBLE){
+                    scannerView.setVisibility(View.GONE);
+                    codeScanner.stopPreview();
+                    button.setImageDrawable(getResources().getDrawable(
+                            R.drawable.baseline_photo_camera_white_24, context.getTheme()));
+                }else{
+                    scannerView.setVisibility(View.VISIBLE);
+                    codeScanner.startPreview();
+                    button.setImageDrawable(getResources().getDrawable(
+                            R.drawable.baseline_close_white_24, context.getTheme()));
+                }
             }
-
         });
 
         //QR Code Scanner
@@ -94,29 +121,81 @@ public class MainActivity extends AppCompatActivity {
         scannerView.setVisibility(View.GONE);
         codeScanner.stopPreview();
         codeScanner.setDecodeCallback(result -> runOnUiThread(() -> {
-            Toast.makeText(getBaseContext(), result.getText(), Toast.LENGTH_SHORT).show();
             dataToWrite = result.getText();
             button.setImageDrawable(getResources().getDrawable(
                     R.drawable.baseline_photo_camera_white_24, context.getTheme()));
-            runUser(result.getText());
+            if (!copyMode){
+                runUser(result.getText());
+            }else{
+                nfcImage.setImageDrawable(ContextCompat.getDrawable(this,
+                        R.drawable.baseline_nfc_24));
+                rippleBackground.startRippleAnimation();
+            }
             scannerView.setVisibility(View.GONE);
             codeScanner.stopPreview();
         }));
         scannerView.setOnClickListener(view -> codeScanner.startPreview());
 
         //NFC
+        readFromIntent(getIntent());
         nfcAdapter = NfcAdapter.getDefaultAdapter(this);
         if (nfcAdapter == null) {
             Toast.makeText(this, "This device doesn't support NFC.", Toast.LENGTH_LONG).show();
             finish();
         }
-        readFromIntent(getIntent());
         pendingIntent = PendingIntent.getActivity(this, 0, new Intent(this,
                 getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 0);
         IntentFilter tagDetected = new IntentFilter(NfcAdapter.ACTION_TAG_DISCOVERED);
         tagDetected.addCategory(Intent.CATEGORY_DEFAULT);
         writeTagFilters = new IntentFilter[] { tagDetected };
 
+    }
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[],
+                                           int[] grantResults) {
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) ==
+                PackageManager.PERMISSION_DENIED){
+            Snackbar.make(contextView,
+                    R.string.PERM_GRANT_ERROR, Snackbar.LENGTH_SHORT)
+                    .show();
+        }else{
+            scannerView.setVisibility(View.VISIBLE);
+            codeScanner.startPreview();
+            button.setImageDrawable(getResources().getDrawable(
+                    R.drawable.baseline_close_white_24, context.getTheme()));
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.copy_write:
+                copyMode = !copyMode;
+                if (copyMode){
+                    rv.setVisibility(View.GONE);
+                    rippleBackground.setVisibility(View.VISIBLE);
+                    rippleBackground.startRippleAnimation();
+                    nfcImage.setImageDrawable(ContextCompat.getDrawable(this,
+                            R.drawable.baseline_photo_camera_24));
+                }else{
+                    rv.setVisibility(View.VISIBLE);
+                    rippleBackground.setVisibility(View.GONE);
+                    rippleBackground.stopRippleAnimation();
+                }
+                Snackbar.make(contextView,
+                        "Write mode set to: " + copyMode, Snackbar.LENGTH_SHORT)
+                        .show();
+
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     @Override
@@ -151,9 +230,13 @@ public class MainActivity extends AppCompatActivity {
                         intent.putExtra("GUID", key);
                         startActivity(intent);
                     }else{
+                        Intent intent = new Intent(context, ExistingUser.class);
+                        intent.putExtra("GUID", key);
+                        startActivity(intent);
                     }
                 });
     }
+
     private void readFromIntent(Intent intent) {
         String action = intent.getAction();
         if (NfcAdapter.ACTION_TAG_DISCOVERED.equals(action)
@@ -180,12 +263,34 @@ public class MainActivity extends AppCompatActivity {
         String textEncoding = ((payload[0] & 128) == 0) ? "UTF-8" : "UTF-16"; // Get the Text Encoding
         int languageCodeLength = payload[0] & 0063; // Get the Language Code, e.g. "en"
         // String languageCode = new String(payload, 1, languageCodeLength, "US-ASCII");
-
         try {
             text = new String(payload, languageCodeLength + 1, payload.length - languageCodeLength - 1, textEncoding);
-            runUser(text);
         } catch (UnsupportedEncodingException e) {
             Log.e("UnsupportedEncoding", e.toString());
+        }
+        if (copyMode){
+            try {
+                if(tag == null) {
+                    Snackbar.make(contextView,
+                            R.string.NFC_ERROR_DETECTED, Snackbar.LENGTH_SHORT)
+                            .show();
+                } else {
+                    write(dataToWrite, tag);
+                    Snackbar.make(contextView,
+                            R.string.NFC_WRITE_SUCCESS, Snackbar.LENGTH_SHORT)
+                            .show();
+                    nfcImage.setImageDrawable(getResources().getDrawable(
+                            R.drawable.baseline_check_circle_24, context.getTheme()));
+                    rippleBackground.stopRippleAnimation();
+                }
+            } catch (IOException | FormatException e) {
+                Snackbar.make(contextView,
+                        R.string.NFC_WRITE_ERROR, Snackbar.LENGTH_SHORT)
+                        .show();
+                e.printStackTrace();
+            }
+        }else{
+            runUser(text);
         }
     }
 
@@ -211,7 +316,9 @@ public class MainActivity extends AppCompatActivity {
         System.arraycopy(langBytes, 0, payload, 1,              langLength);
         System.arraycopy(textBytes, 0, payload, 1 + langLength, textLength);
 
-        return new NdefRecord(NdefRecord.TNF_WELL_KNOWN,  NdefRecord.RTD_TEXT,  new byte[0], payload);
+        NdefRecord recordNFC = new NdefRecord(NdefRecord.TNF_WELL_KNOWN,  NdefRecord.RTD_TEXT,  new byte[0], payload);
+
+        return recordNFC;
     }
 
     private void WriteModeOn(){

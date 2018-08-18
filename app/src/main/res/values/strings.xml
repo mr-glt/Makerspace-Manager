@@ -4,6 +4,7 @@
     <string name="NFC_WRITE_SUCCESS">ID written to the NFC tag successfully!</string>
     <string name="NFC_WRITE_ERROR">Error during writing, is the NFC tag close enough to your device?</string>
     <string name="DATABASE_ADD_ERROR">Failed to Communicate with Database</string>
+    <string name="PERM_GRANT_ERROR">To Scan QR Codes Grant Camera Access</string>
     <string name="senior_design">Senior Design</string>
     <string name="freshman_design">Freshman Design</string>
     <string name="student_organization">Student Organization</string>
@@ -11,8 +12,13 @@
     <string name="add_user">Add User</string>
     <string name="major">Major:</string>
     <string name="rocket_number">Rocket Number</string>
-    <string name="name">Name</string>
     <string name="nfc_good">Tag Written Successfully</string>
+    <string name="name">Name</string>
+    <string name="CERT_DEF">LEVEL 1</string>
+    <string name="employee">Employee</string>
+    <string name="maker_socierty">Maker Socierty</string>
+    <string name="admin">Admin</string>
+    <string name="certifier">Certifier</string>
 
     <string-array name="majors_array">
         <item>Other</item>

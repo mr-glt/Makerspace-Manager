@@ -1,4 +1,4 @@
-package org.utmakersociety.makerspacemanager;
+package org.utmakersociety.makerspacemanager.activities;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
@@ -33,6 +33,9 @@ import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.skyfishjy.library.RippleBackground;
 
+import org.utmakersociety.makerspacemanager.R;
+import org.utmakersociety.makerspacemanager.activities.MainActivity;
+
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
@@ -45,6 +48,7 @@ public class NewUser extends AppCompatActivity {
     TextInputEditText rocketNumberET;
     TextInputEditText studentOrgET;
     TextInputLayout orgHolder;
+    CheckBox employeeCB;
     CheckBox freshmanDesignCB;
     CheckBox seniorDesignCB;
     CheckBox studentOrgCB;
@@ -91,7 +95,8 @@ public class NewUser extends AppCompatActivity {
             Toast.makeText(this, "This device doesn't support NFC.", Toast.LENGTH_LONG).show();
             finish();
         }
-        pendingIntent = PendingIntent.getActivity(this, 0, new Intent(this, getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 0);
+        pendingIntent = PendingIntent.getActivity(this, 0, new Intent(this,
+                getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 0);
         IntentFilter tagDetected = new IntentFilter(NfcAdapter.ACTION_TAG_DISCOVERED);
         tagDetected.addCategory(Intent.CATEGORY_DEFAULT);
         writeTagFilters = new IntentFilter[] { tagDetected };
@@ -124,6 +129,9 @@ public class NewUser extends AppCompatActivity {
                     case 6:
                         major = "ENGT";
                         break;
+                    case 7:
+                        major = "CIVE";
+                        break;
                     default:
                         major = "Other";
                         break;
@@ -141,6 +149,7 @@ public class NewUser extends AppCompatActivity {
         writeTag = findViewById(R.id.burnTag);
         nameET = findViewById(R.id.name);
         rocketNumberET = findViewById(R.id.rocketNumber);
+        employeeCB = findViewById(R.id.employeeCB);
         freshmanDesignCB = findViewById(R.id.freshmanDesignCB);
         seniorDesignCB = findViewById(R.id.seniorDesignCB);
         studentOrgCB = findViewById(R.id.studentOrgCB);
@@ -197,10 +206,16 @@ public class NewUser extends AppCompatActivity {
                 rocketNumberET.setError("Must have a rocket number.");
                 allGood = false;
             }
-
+            user.put("employee",employeeCB.isChecked());
             user.put("freshmanDesign",freshmanDesignCB.isChecked());
             user.put("seniorDesign",seniorDesignCB.isChecked());
             user.put("studentOrg",studentOrgCB.isChecked());
+
+            user.put("ms",false);
+            user.put("admin",false);
+            user.put("cert",false);
+            user.put("certLevel","1");
+
 
             if (studentOrgCB.isChecked()){
                 if (!Objects.requireNonNull(studentOrgET.getText()).toString().equals(""))
