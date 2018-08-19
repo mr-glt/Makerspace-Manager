@@ -1,6 +1,5 @@
 package org.utmakersociety.makerspacemanager.activities;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -24,7 +23,6 @@ import android.os.Parcelable;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -34,6 +32,9 @@ import com.budiyev.android.codescanner.CodeScannerView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.pchmn.materialchips.ChipsInput;
+import com.pchmn.materialchips.model.Chip;
+import com.pchmn.materialchips.model.ChipInterface;
 import com.skyfishjy.library.RippleBackground;
 
 import org.utmakersociety.makerspacemanager.R;
@@ -42,6 +43,9 @@ import org.utmakersociety.makerspacemanager.helpers.RecyclerItemClickListener;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity{
     //QR Code Variables
@@ -63,12 +67,15 @@ public class MainActivity extends AppCompatActivity{
     FloatingActionButton button;
     RippleBackground rippleBackground;
     ImageView nfcImage;
+    ChipsInput chipsInput;
 
     //Other
     boolean copyMode;
     Context context;
     View contextView;
     Tag tag;
+    List<Chip> utilChips = new ArrayList<>();
+    List<Chip> users = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,17 +84,61 @@ public class MainActivity extends AppCompatActivity{
         context = this;
         contextView = findViewById(R.id.mainLayout);
 
+
+        utilChips.add(new Chip(getDrawable
+                (R.drawable.baseline_memory_24),"EECS","EECS Major"));
+        utilChips.add(new Chip(getDrawable
+                (R.drawable.baseline_developer_board_24),"ENGT","Engineering Tech Major"));
+        utilChips.add(new Chip(getDrawable
+                (R.drawable.baseline_terrain_24),"CIVE","CIVE Major"));
+        utilChips.add(new Chip(getDrawable
+                (R.drawable.baseline_bug_report_24),"BIOE","BIOE Major"));
+        utilChips.add(new Chip(getDrawable
+                (R.drawable.baseline_build_24),"MECHE","MECHE Major"));
+        utilChips.add(new Chip(getDrawable
+                (R.drawable.baseline_opacity_24),"CHEME","CHEME Major"));
+        utilChips.add(new Chip(getDrawable
+                (R.drawable.baseline_book_24),"Other","Other Major"));
+
+        utilChips.add(new Chip(getDrawable
+                (R.drawable.baseline_vpn_key_24),getString(R.string.admin),"Has authority over the database"));
+        utilChips.add(new Chip(getDrawable
+                (R.drawable.baseline_assignment_24),getString(R.string.certifier)
+                ,"Has authority certification level"));
+        utilChips.add(new Chip(getDrawable
+                (R.drawable.baseline_work_24),getString(R.string.employee)
+                ,"Employed to manage the Makerspace"));
+        utilChips.add(new Chip(getDrawable
+                (R.drawable.baseline_child_friendly_24),getString(R.string.freshman_design)
+                ,"Member of freshman design"));
+        utilChips.add(new Chip(getDrawable
+                (R.drawable.baseline_school_24),getString(R.string.senior_design)
+                ,"Member of senior design"));
+        utilChips.add(new Chip(getDrawable
+                (R.drawable.baseline_account_balance_24),getString(R.string.student_organization)
+                ,"Representative of another student organization"));
+
         //Firebase
         db = FirebaseFirestore.getInstance();
         db.collection("users")
+                .orderBy("name")
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
+                        users.clear();
+                        for (int i = 0; i < task.getResult().size();i++){
+                            users.add(new Chip(Objects.requireNonNull(task.getResult().
+                                    getDocuments().get(i).get("name")).toString()
+                                    ,"Level " + Objects.requireNonNull(task.getResult()
+                                    .getDocuments().get(i).get("certLevel")).toString() + " Member"));
+                        }
+                        List<Chip> chips = new ArrayList<>(utilChips);
+                        chips.addAll(users);
+                        chipsInput.setFilterableList(chips);
                         rv.setLayoutManager(new LinearLayoutManager(getBaseContext()));
                         rv.setAdapter(new UsersAdapter(task.getResult(),context));
                         rv.addOnItemTouchListener(new RecyclerItemClickListener(getBaseContext(),
                                 (view, position) -> {
-                            Log.e("POS",position+"");
                         }));
                     }
                 });
@@ -96,6 +147,7 @@ public class MainActivity extends AppCompatActivity{
         button = findViewById(R.id.floatingActionButton);
         scannerView = findViewById(R.id.scanner_view);
         rv = findViewById(R.id.recView);
+        chipsInput = findViewById(R.id.chips_input);
         rippleBackground = findViewById(R.id.rippleView);
         nfcImage = findViewById(R.id.nfcImage);
         button.setOnClickListener(view -> {
@@ -113,6 +165,22 @@ public class MainActivity extends AppCompatActivity{
                     button.setImageDrawable(getResources().getDrawable(
                             R.drawable.baseline_close_white_24, context.getTheme()));
                 }
+            }
+        });
+
+        chipsInput.addChipsListener(new ChipsInput.ChipsListener() {
+            @Override
+            public void onChipAdded(ChipInterface chip, int newSize) {
+                Log.e("CHIPZ","Added: " + chip.getLabel());
+            }
+
+            @Override
+            public void onChipRemoved(ChipInterface chip, int newSize) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence text) {
             }
         });
 

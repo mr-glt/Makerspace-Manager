@@ -7,15 +7,36 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".activities.MainActivity">
-
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/searchCard"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/searchCard">
+        <com.pchmn.materialchips.ChipsInput
+            style="@style/Widget.MaterialComponents.Chip.Action"
+            android:id="@+id/chips_input"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:hint="Enter Field or Name"
+            app:chip_deletable="true"
+            app:chip_backgroundColor="#ebebeb"
+            app:chip_hasAvatarIcon="true"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            app:chip_detailed_backgroundColor="#ebebeb"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/searchCard"/>
+    </com.google.android.material.card.MaterialCardView>
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recView"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toBottomOf="@id/searchCard">
 
 
     </androidx.recyclerview.widget.RecyclerView>
