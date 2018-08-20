@@ -1,5 +1,6 @@
 package org.utmakersociety.makerspacemanager.activities;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -24,14 +25,25 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
+import android.view.animation.AnimationUtils;
+import android.view.animation.LayoutAnimationController;
 import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.budiyev.android.codescanner.CodeScanner;
 import com.budiyev.android.codescanner.CodeScannerView;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.pchmn.materialchips.ChipsInput;
 import com.pchmn.materialchips.model.Chip;
 import com.pchmn.materialchips.model.ChipInterface;
@@ -44,7 +56,9 @@ import org.utmakersociety.makerspacemanager.helpers.RecyclerItemClickListener;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity{
@@ -76,6 +90,15 @@ public class MainActivity extends AppCompatActivity{
     Tag tag;
     List<Chip> utilChips = new ArrayList<>();
     List<Chip> users = new ArrayList<>();
+    String name = null;
+    String major = null;
+    boolean hasEmployee = false;
+    boolean hasAdmin = false;
+    boolean hasFreshmanDesign = false;
+    boolean hasSeniorDesign = false;
+    boolean hasCertifier = false;
+    boolean hasStudentOrganizationName = false;
+    int lastChipID = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,65 +106,45 @@ public class MainActivity extends AppCompatActivity{
         setContentView(R.layout.activity_main);
         context = this;
         contextView = findViewById(R.id.mainLayout);
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
 
 
-        utilChips.add(new Chip(getDrawable
+        utilChips.add(new Chip(0,getDrawable
                 (R.drawable.baseline_memory_24),"EECS","EECS Major"));
-        utilChips.add(new Chip(getDrawable
+        utilChips.add(new Chip(1,getDrawable
                 (R.drawable.baseline_developer_board_24),"ENGT","Engineering Tech Major"));
-        utilChips.add(new Chip(getDrawable
+        utilChips.add(new Chip(2,getDrawable
                 (R.drawable.baseline_terrain_24),"CIVE","CIVE Major"));
-        utilChips.add(new Chip(getDrawable
+        utilChips.add(new Chip(3,getDrawable
                 (R.drawable.baseline_bug_report_24),"BIOE","BIOE Major"));
-        utilChips.add(new Chip(getDrawable
+        utilChips.add(new Chip(4,getDrawable
                 (R.drawable.baseline_build_24),"MECHE","MECHE Major"));
-        utilChips.add(new Chip(getDrawable
+        utilChips.add(new Chip(5,getDrawable
                 (R.drawable.baseline_opacity_24),"CHEME","CHEME Major"));
-        utilChips.add(new Chip(getDrawable
+        utilChips.add(new Chip(6,getDrawable
                 (R.drawable.baseline_book_24),"Other","Other Major"));
 
-        utilChips.add(new Chip(getDrawable
+        utilChips.add(new Chip(7,getDrawable
                 (R.drawable.baseline_vpn_key_24),getString(R.string.admin),"Has authority over the database"));
-        utilChips.add(new Chip(getDrawable
+        utilChips.add(new Chip(8,getDrawable
                 (R.drawable.baseline_assignment_24),getString(R.string.certifier)
                 ,"Has authority certification level"));
-        utilChips.add(new Chip(getDrawable
+        utilChips.add(new Chip(9,getDrawable
                 (R.drawable.baseline_work_24),getString(R.string.employee)
                 ,"Employed to manage the Makerspace"));
-        utilChips.add(new Chip(getDrawable
+        utilChips.add(new Chip(10,getDrawable
                 (R.drawable.baseline_child_friendly_24),getString(R.string.freshman_design)
                 ,"Member of freshman design"));
-        utilChips.add(new Chip(getDrawable
+        utilChips.add(new Chip(11,getDrawable
                 (R.drawable.baseline_school_24),getString(R.string.senior_design)
                 ,"Member of senior design"));
-        utilChips.add(new Chip(getDrawable
+        utilChips.add(new Chip(12,getDrawable
                 (R.drawable.baseline_account_balance_24),getString(R.string.student_organization)
                 ,"Representative of another student organization"));
 
         //Firebase
         db = FirebaseFirestore.getInstance();
-        db.collection("users")
-                .orderBy("name")
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        users.clear();
-                        for (int i = 0; i < task.getResult().size();i++){
-                            users.add(new Chip(Objects.requireNonNull(task.getResult().
-                                    getDocuments().get(i).get("name")).toString()
-                                    ,"Level " + Objects.requireNonNull(task.getResult()
-                                    .getDocuments().get(i).get("certLevel")).toString() + " Member"));
-                        }
-                        List<Chip> chips = new ArrayList<>(utilChips);
-                        chips.addAll(users);
-                        chipsInput.setFilterableList(chips);
-                        rv.setLayoutManager(new LinearLayoutManager(getBaseContext()));
-                        rv.setAdapter(new UsersAdapter(task.getResult(),context));
-                        rv.addOnItemTouchListener(new RecyclerItemClickListener(getBaseContext(),
-                                (view, position) -> {
-                        }));
-                    }
-                });
+        updateRV();
 
         //Setup UI
         button = findViewById(R.id.floatingActionButton);
@@ -155,11 +158,13 @@ public class MainActivity extends AppCompatActivity{
                 ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.CAMERA}, 1);
             }else{
                 if (scannerView.getVisibility()==View.VISIBLE){
+                    chipsInput.setVisibility(View.VISIBLE);
                     scannerView.setVisibility(View.GONE);
                     codeScanner.stopPreview();
                     button.setImageDrawable(getResources().getDrawable(
                             R.drawable.baseline_photo_camera_white_24, context.getTheme()));
                 }else{
+                    chipsInput.setVisibility(View.GONE);
                     scannerView.setVisibility(View.VISIBLE);
                     codeScanner.startPreview();
                     button.setImageDrawable(getResources().getDrawable(
@@ -171,12 +176,61 @@ public class MainActivity extends AppCompatActivity{
         chipsInput.addChipsListener(new ChipsInput.ChipsListener() {
             @Override
             public void onChipAdded(ChipInterface chip, int newSize) {
-                Log.e("CHIPZ","Added: " + chip.getLabel());
+                if ((Integer) chip.getId()>=13){
+                    name = chip.getLabel();
+                }else{
+                    if ((Integer) chip.getId()<7){
+                        major = chip.getLabel();
+                    }else{
+                        if ((Integer) chip.getId()==7){
+                            hasAdmin = true;
+                        }else if((Integer) chip.getId()==8){
+                            hasCertifier = true;
+                        }else if((Integer) chip.getId()==9){
+                            hasEmployee = true;
+                        }else if((Integer) chip.getId()==10){
+                            hasFreshmanDesign = true;
+                        }
+                        else if((Integer) chip.getId()==11){
+                            hasSeniorDesign = true;
+                        }
+                        else if((Integer) chip.getId()==12){
+                            hasStudentOrganizationName = true;
+
+                        }
+                    }
+                }
+                updateRV();
+
             }
 
             @Override
             public void onChipRemoved(ChipInterface chip, int newSize) {
+                if ((Integer) chip.getId()>=13){
+                    name = null;
+                }else{
+                    if ((Integer) chip.getId()<7){
+                        major = null;
+                    }else{
+                        if ((Integer) chip.getId()==7){
+                            hasAdmin = false;
+                        }else if((Integer) chip.getId()==8){
+                            hasCertifier = false;
+                        }else if((Integer) chip.getId()==9){
+                            hasEmployee = false;
+                        }else if((Integer) chip.getId()==10){
+                            hasFreshmanDesign = false;
+                        }
+                        else if((Integer) chip.getId()==11){
+                            hasSeniorDesign = false;
+                        }
+                        else if((Integer) chip.getId()==12){
+                            hasStudentOrganizationName = false;
 
+                        }
+                    }
+                }
+                updateRV();
             }
 
             @Override
@@ -192,13 +246,8 @@ public class MainActivity extends AppCompatActivity{
             dataToWrite = result.getText();
             button.setImageDrawable(getResources().getDrawable(
                     R.drawable.baseline_photo_camera_white_24, context.getTheme()));
-            if (!copyMode){
-                runUser(result.getText());
-            }else{
-                nfcImage.setImageDrawable(ContextCompat.getDrawable(this,
-                        R.drawable.baseline_nfc_24));
-                rippleBackground.startRippleAnimation();
-            }
+            chipsInput.setVisibility(View.VISIBLE);
+            runUser(result.getText());
             scannerView.setVisibility(View.GONE);
             codeScanner.stopPreview();
         }));
@@ -228,6 +277,7 @@ public class MainActivity extends AppCompatActivity{
                     .show();
         }else{
             scannerView.setVisibility(View.VISIBLE);
+            chipsInput.setVisibility(View.GONE);
             codeScanner.startPreview();
             button.setImageDrawable(getResources().getDrawable(
                     R.drawable.baseline_close_white_24, context.getTheme()));
@@ -278,17 +328,87 @@ public class MainActivity extends AppCompatActivity{
     @Override
     protected void onResume() {
         super.onResume();
-        WriteModeOn();
         codeScanner.startPreview();
     }
 
     @Override
     protected void onPause() {
         codeScanner.releaseResources();
-        WriteModeOff();
         super.onPause();
     }
 
+    public void addChip(Chip chip){
+        chipsInput.addChip(chip);
+    }
+    public void addChipDisplayCheckIn(Chip chip,int position){
+        View card = rv.getLayoutManager().findViewByPosition(position);
+        MaterialButton editButton = card.findViewById(R.id.edit);
+        MaterialButton checkInButton = card.findViewById(R.id.checkIn);
+        editButton.setVisibility(View.VISIBLE);
+        checkInButton.setVisibility(View.VISIBLE);
+        chipsInput.addChip(chip);
+    }
+
+    private void updateRV(){
+        Query query = db.collection("users");
+        if (name!=null){
+            query = query.whereEqualTo("name",name);
+        }
+        if (major!=null){
+            query = query.whereEqualTo("major",major);
+        }
+        if (hasEmployee){
+            query = query.whereEqualTo("employee",true);
+        }
+        if (hasAdmin){
+            query = query.whereEqualTo("admin",true);
+        }
+        if (hasCertifier){
+            query = query.whereEqualTo("cert",true);
+        }
+        if (hasFreshmanDesign){
+            query = query.whereEqualTo("freshmanDesign",true);
+        }
+        if (hasSeniorDesign){
+            query = query.whereEqualTo("seniorDesign",true);
+        }
+        query.get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        users.clear();
+                        lastChipID = 13;
+                        for (int i = 0; i < task.getResult().size();i++){
+                            users.add(new Chip(i+13,Objects.requireNonNull(task.getResult().
+                                    getDocuments().get(i).get("name")).toString()
+                                    ,"Level " + Objects.requireNonNull(task.getResult()
+                                    .getDocuments().get(i).get("certLevel")).toString() + " Member"));
+                            lastChipID++;
+                        }
+                        List<Chip> chips = new ArrayList<>(utilChips);
+                        chips.addAll(users);
+                        chipsInput.setFilterableList(chips);
+                        int resId = R.anim.layout_animation_fall_down;
+                        LayoutAnimationController animation = AnimationUtils.loadLayoutAnimation(getBaseContext(), resId);
+                        rv.setLayoutAnimation(animation);
+                        rv.setHasFixedSize(true);
+                        rv.setLayoutManager(new LinearLayoutManager(getBaseContext()));
+                        rv.setAdapter(new UsersAdapter(task.getResult(),context));
+                    }
+                });
+    }
+    public void checkInUser(String guid,String label){
+        Map<String, Object> checkIn = new HashMap<>();
+        checkIn.put("time",System.currentTimeMillis());
+        db.collection("users").document(guid).collection("checkIns")
+                .add(checkIn)
+                .addOnSuccessListener(documentReference -> {
+                    Snackbar.make(contextView,
+                            "Checked in User", Snackbar.LENGTH_SHORT).show();
+                    chipsInput.removeChipByLabel(label);
+                })
+                .addOnFailureListener(e -> Snackbar.make(contextView,
+                        "Failed to Check in User", Snackbar.LENGTH_SHORT).show());
+    }
     private void runUser(String key){
         db.collection("users").document(key)
                 .get()
@@ -298,9 +418,10 @@ public class MainActivity extends AppCompatActivity{
                         intent.putExtra("GUID", key);
                         startActivity(intent);
                     }else{
-                        Intent intent = new Intent(context, ExistingUser.class);
-                        intent.putExtra("GUID", key);
-                        startActivity(intent);
+                        addChip(new Chip(lastChipID+1,Objects.requireNonNull(task.getResult()
+                                .get("name")).toString(),"Level " +
+                                Objects.requireNonNull(task.getResult().get("certLevel"))
+                                        .toString() + " Member"));
                     }
                 });
     }
@@ -336,66 +457,7 @@ public class MainActivity extends AppCompatActivity{
         } catch (UnsupportedEncodingException e) {
             Log.e("UnsupportedEncoding", e.toString());
         }
-        if (copyMode){
-            try {
-                if(tag == null) {
-                    Snackbar.make(contextView,
-                            R.string.NFC_ERROR_DETECTED, Snackbar.LENGTH_SHORT)
-                            .show();
-                } else {
-                    write(dataToWrite, tag);
-                    Snackbar.make(contextView,
-                            R.string.NFC_WRITE_SUCCESS, Snackbar.LENGTH_SHORT)
-                            .show();
-                    nfcImage.setImageDrawable(getResources().getDrawable(
-                            R.drawable.baseline_check_circle_24, context.getTheme()));
-                    rippleBackground.stopRippleAnimation();
-                }
-            } catch (IOException | FormatException e) {
-                Snackbar.make(contextView,
-                        R.string.NFC_WRITE_ERROR, Snackbar.LENGTH_SHORT)
-                        .show();
-                e.printStackTrace();
-            }
-        }else{
-            runUser(text);
-        }
-    }
 
-    private void write(String text, Tag tag) throws IOException, FormatException {
-        NdefRecord[] records = { createRecord(text) };
-        NdefMessage message = new NdefMessage(records);
-        Ndef ndef = Ndef.get(tag);
-        ndef.connect();
-        ndef.writeNdefMessage(message);
-        ndef.close();
-    }
-
-    private NdefRecord createRecord(String text) throws UnsupportedEncodingException {
-        String lang       = "en";
-        byte[] textBytes  = text.getBytes();
-        byte[] langBytes  = lang.getBytes("US-ASCII");
-        int    langLength = langBytes.length;
-        int    textLength = textBytes.length;
-        byte[] payload    = new byte[1 + langLength + textLength];
-
-        payload[0] = (byte) langLength;
-
-        System.arraycopy(langBytes, 0, payload, 1,              langLength);
-        System.arraycopy(textBytes, 0, payload, 1 + langLength, textLength);
-
-        NdefRecord recordNFC = new NdefRecord(NdefRecord.TNF_WELL_KNOWN,  NdefRecord.RTD_TEXT,  new byte[0], payload);
-
-        return recordNFC;
-    }
-
-    private void WriteModeOn(){
-        writeMode = true;
-        nfcAdapter.enableForegroundDispatch(this, pendingIntent, writeTagFilters, null);
-    }
-
-    private void WriteModeOff(){
-        writeMode = false;
-        nfcAdapter.disableForegroundDispatch(this);
+        runUser(text);
     }
 }

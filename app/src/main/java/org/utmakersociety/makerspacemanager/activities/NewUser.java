@@ -63,6 +63,7 @@ public class NewUser extends AppCompatActivity {
     PendingIntent pendingIntent;
     IntentFilter writeTagFilters[];
     boolean writeMode;
+    boolean firstOpen = true;
 
     //Firebase
     FirebaseFirestore db;
@@ -127,10 +128,10 @@ public class NewUser extends AppCompatActivity {
                         major = "CHEME";
                         break;
                     case 6:
-                        major = "ENGT";
+                        major = "CIVE";
                         break;
                     case 7:
-                        major = "CIVE";
+                        major = "ENGT";
                         break;
                     default:
                         major = "Other";
@@ -163,9 +164,13 @@ public class NewUser extends AppCompatActivity {
         writeTag.setOnClickListener(view -> {
             try {
                 if(tag == null) {
-                    Snackbar.make(contextView,
-                            R.string.NFC_ERROR_DETECTED, Snackbar.LENGTH_SHORT)
-                            .show();
+                    if (!firstOpen){
+                        Snackbar.make(contextView,
+                                R.string.NFC_ERROR_DETECTED, Snackbar.LENGTH_SHORT)
+                                .show();
+                    }else{
+                        firstOpen = false;
+                    }
                 } else {
                     write(guid, tag);
                     Snackbar.make(contextView,
@@ -263,6 +268,32 @@ public class NewUser extends AppCompatActivity {
 
     private void readFromIntent(Intent intent) {
         String action = intent.getAction();
+        try {
+            if(tag == null) {
+                if (!firstOpen){
+                    Snackbar.make(contextView,
+                            R.string.NFC_ERROR_DETECTED, Snackbar.LENGTH_SHORT)
+                            .show();
+                }else{
+                    firstOpen = false;
+                }
+            } else {
+                write(guid, tag);
+                Snackbar.make(contextView,
+                        R.string.NFC_WRITE_SUCCESS, Snackbar.LENGTH_SHORT)
+                        .show();
+                rippleBackground.stopRippleAnimation();
+                nfcImage.setImageDrawable(ContextCompat.getDrawable(this,
+                        R.drawable.baseline_check_circle_24));
+                nfcWriteText.setText(R.string.nfc_good);
+                addUser.setEnabled(true);
+            }
+        } catch (IOException | FormatException e) {
+            Snackbar.make(contextView,
+                    R.string.NFC_WRITE_ERROR, Snackbar.LENGTH_SHORT)
+                    .show();
+            e.printStackTrace();
+        }
         if (NfcAdapter.ACTION_TAG_DISCOVERED.equals(action)
                 || NfcAdapter.ACTION_TECH_DISCOVERED.equals(action)
                 || NfcAdapter.ACTION_NDEF_DISCOVERED.equals(action)) {
@@ -292,29 +323,6 @@ public class NewUser extends AppCompatActivity {
             text = new String(payload, languageCodeLength + 1, payload.length - languageCodeLength - 1, textEncoding);
         } catch (UnsupportedEncodingException e) {
             Log.e("UnsupportedEncoding", e.toString());
-        }
-
-        try {
-            if(tag == null) {
-                Snackbar.make(contextView,
-                        R.string.NFC_ERROR_DETECTED, Snackbar.LENGTH_SHORT)
-                        .show();
-            } else {
-                write(guid, tag);
-                Snackbar.make(contextView,
-                        R.string.NFC_WRITE_SUCCESS, Snackbar.LENGTH_SHORT)
-                        .show();
-                rippleBackground.stopRippleAnimation();
-                nfcImage.setImageDrawable(ContextCompat.getDrawable(this,
-                        R.drawable.baseline_check_circle_24));
-                nfcWriteText.setText(R.string.nfc_good);
-                addUser.setEnabled(true);
-            }
-        } catch (IOException | FormatException e) {
-            Snackbar.make(contextView,
-                    R.string.NFC_WRITE_ERROR, Snackbar.LENGTH_SHORT)
-                    .show();
-            e.printStackTrace();
         }
 
     }

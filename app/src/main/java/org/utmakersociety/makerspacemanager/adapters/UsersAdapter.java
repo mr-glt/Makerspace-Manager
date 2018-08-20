@@ -12,6 +12,7 @@ import com.google.android.material.chip.Chip;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import org.utmakersociety.makerspacemanager.R;
+import org.utmakersociety.makerspacemanager.activities.MainActivity;
 
 import java.util.Objects;
 
@@ -37,6 +38,7 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.ViewHolder> 
 
     @Override
     public void onBindViewHolder (@NonNull ViewHolder holder, int position){
+        holder.setIsRecyclable(false);
         holder.nameTV.setText(Objects.requireNonNull(users.getDocuments().get(position)
                 .get("name")).toString());
         holder.certLevelTV.setText("Level " + Objects.requireNonNull(users.getDocuments()
@@ -106,6 +108,68 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.ViewHolder> 
                 holder.checkIn.setVisibility(View.GONE);
                 holder.edit.setVisibility(View.GONE);
             }
+        });
+
+        holder.adminChip.setOnClickListener(view -> {
+            try {
+                ((MainActivity) view.getContext()).addChip(
+                    new com.pchmn.materialchips.model.Chip(7,context.getDrawable
+                    (R.drawable.baseline_vpn_key_24),context.getString(R.string.admin)
+                            ,"Has authority over the database"));
+            } catch (Exception ignored) {
+            }
+        });
+        holder.certChip.setOnClickListener(view -> {
+            try {
+                ((MainActivity) view.getContext()).addChip(
+                    new com.pchmn.materialchips.model.Chip(8,context.getDrawable
+                        (R.drawable.baseline_assignment_24),context.getString(R.string.certifier)
+                            ,"Has authority certification level"));
+            } catch (Exception ignored) {
+            }
+        });
+        holder.employeeChip.setOnClickListener(view -> {
+            try {
+                ((MainActivity) view.getContext()).addChip(
+                    new com.pchmn.materialchips.model.Chip(9,context.getDrawable
+                    (R.drawable.baseline_work_24),context.getString(R.string.employee)
+                            ,"Employed to manage the Makerspace"));
+            } catch (Exception ignored) {
+            }
+        });
+        holder.seniorChip.setOnClickListener(view -> {
+            try {
+                ((MainActivity) view.getContext()).addChip(
+                    new com.pchmn.materialchips.model.Chip(11,context.getDrawable
+                        (R.drawable.baseline_school_24),context.getString(R.string.senior_design)
+                        ,"Member of senior design"));
+            } catch (Exception ignored) {
+            }
+        });
+        holder.freshmanChip.setOnClickListener(view -> {
+            try {
+                ((MainActivity) view.getContext()).addChip(
+                    new com.pchmn.materialchips.model.Chip(10,context.getDrawable
+                        (R.drawable.baseline_child_friendly_24),context.getString(R.string.freshman_design)
+                        ,"Member of freshman design"));
+            } catch (Exception ignored) {
+            }
+        });
+        holder.orgChip.setOnClickListener(view -> {
+            try {
+                ((MainActivity) view.getContext()).addChip(
+                        new com.pchmn.materialchips.model.Chip(12,context.getDrawable
+                                (R.drawable.baseline_account_balance_24),context
+                                .getString(R.string.student_organization)
+                                ,"Representative of another student organization"));
+            } catch (Exception ignored) {
+            }
+        });
+        holder.checkIn.setOnClickListener(view -> {
+            ((MainActivity) view.getContext()).checkInUser(users.getDocuments().get(position).getId()
+                ,Objects.requireNonNull(users.getDocuments().get(position).get("name")).toString());
+            holder.checkIn.setVisibility(View.GONE);
+            holder.edit.setVisibility(View.GONE);
         });
     }
 
